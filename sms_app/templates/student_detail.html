@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{ student.name }} | Achievements</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            opacity: 0; 
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: #000000;
+        }
+        body.page-loaded { opacity: 1; }
+    </style>
+</head>
+<body class="text-[#f5f5f7] antialiased">
+    <div class="max-w-3xl mx-auto px-6 py-20">
+        <div class="flex justify-between items-center mb-12">
+            <a href="{% url 'student_list' %}" class="text-[#2997ff] hover:text-white transition-colors flex items-center text-sm font-medium">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+                All Students
+            </a>
+            <button onclick="toggleModal()" class="px-6 py-2 bg-white text-black text-sm font-bold rounded-full hover:bg-gray-200 transition">
+                + Add Achievement
+            </button>
+        </div>
+        
+        <div class="mb-16">
+            <h1 class="text-5xl font-bold tracking-tight mb-4 text-white">{{ student.name }}</h1>
+            <p class="text-[#a1a1a6] font-medium text-lg">{{ student.department }} • Reg: {{ student.register_number }}</p>
+        </div>
+
+        <div class="space-y-8">
+            {% for ach in achievements %}
+            <div class="bg-[#1c1c1e] p-10 rounded-[2.5rem] shadow-xl border border-white/5 flex justify-between items-start group">
+                <div class="flex-1">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <h3 class="text-2xl font-bold text-white">{{ ach.title }}</h3>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                            {{ ach.category.name }}
+                        </span>
+                    </div>
+                    <p class="text-[#a1a1a6] leading-relaxed text-lg">{{ ach.description }}</p>
+                </div>
+                <a href="{% url 'delete_achievement' ach.pk %}" onclick="return confirm('Remove this achievement?')" class="text-red-500/50 hover:text-red-500 transition-colors ml-6">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                </a>
+            </div>
+            {% empty %}
+            <div class="bg-[#1c1c1e] p-16 rounded-[2.5rem] text-center border border-dashed border-white/10">
+                <p class="text-[#a1a1a6] text-lg">No achievements recorded yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="addModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] flex items-center justify-center p-6 text-white">
+        <div class="bg-[#1c1c1e] w-full max-w-md p-10 rounded-[2.5rem] border border-white/10 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6">New Achievement</h2>
+            <form action="{% url 'add_achievement' student.pk %}" method="POST" class="space-y-6">
+                {% csrf_token %}
+                <input type="text" name="title" placeholder="Title" required class="w-full bg-black border border-white/10 rounded-2xl px-5 py-3 outline-none focus:border-blue-500">
+                <textarea name="description" placeholder="Description" required class="w-full bg-black border border-white/10 rounded-2xl px-5 py-3 outline-none focus:border-blue-500 h-32"></textarea>
+                <select name="category" required class="w-full bg-black border border-white/10 rounded-2xl px-5 py-3 outline-none focus:border-blue-500">
+                    <option value="" disabled selected>Select Category</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+                <div class="flex space-x-4 pt-4">
+                    <button type="submit" class="flex-1 bg-[#0071e3] py-3 rounded-full font-bold hover:bg-[#0077ed]">Save</button>
+                    <button type="button" onclick="toggleModal()" class="flex-1 bg-white/5 py-3 rounded-full font-bold">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => { document.body.classList.add("page-loaded"); });
+        function toggleModal() { document.getElementById('addModal').classList.toggle('hidden'); }
+    </script>
+</body>
+</html>

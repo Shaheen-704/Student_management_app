@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Students | School of Sciences</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            opacity: 0; 
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: #000000;
+        }
+        body.page-loaded { opacity: 1; }
+        .glass-nav {
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body class="text-[#f5f5f7] antialiased">
+    <nav class="sticky top-0 z-50 w-full glass-nav border-b border-white/10">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+            <span class="text-xl font-semibold tracking-tight">Christ University</span>
+            <div class="hidden md:flex space-x-8 text-sm font-medium text-[#a1a1a6]">
+                <a href="{% url 'student_list' %}" class="transition-link hover:text-white transition-colors">Records</a>
+                <a href="/admin" class="hover:text-white transition-colors">Admin Portal</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="max-w-5xl mx-auto px-6 pt-20 pb-12 flex justify-between items-end">
+        <div>
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tighter mb-4 bg-gradient-to-b from-white to-[#a1a1a6] bg-clip-text text-transparent">
+                Department Students
+            </h1>
+            <p class="text-lg md:text-xl text-[#a1a1a6] font-medium">Precision tracking for the School of Sciences.</p>
+        </div>
+        <button onclick="toggleModal()" class="mb-2 px-6 py-2 bg-white text-black text-sm font-bold rounded-full hover:bg-gray-200 transform hover:scale-105 active:scale-95 transition-all shadow-lg">
+            + Add Student
+        </button>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 pb-24">
+        <div class="bg-[#1c1c1e] rounded-[2.5rem] shadow-2xl border border-white/5 overflow-hidden">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-[#2c2c2e]/50 border-b border-white/5 text-[11px] uppercase tracking-[0.15em] text-[#a1a1a6]">
+                        <th class="px-10 py-5 font-bold">Name</th>
+                        <th class="px-10 py-5 font-bold">Registration</th>
+                        <th class="px-10 py-5 font-bold">Course</th>
+                        <th class="px-10 py-5 text-right">Access</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for student in students %}
+                    <tr class="hover:bg-white/[0.02] transition-all group">
+                        <td class="px-10 py-7 font-semibold text-lg text-white">{{ student.name }}</td>
+                        <td class="px-10 py-7 text-[#a1a1a6] font-mono text-sm tracking-tight">{{ student.register_number }}</td>
+                        <td class="px-10 py-7 text-[#f5f5f7]/80">{{ student.course }}</td>
+                        <td class="px-10 py-7 text-right space-x-4">
+                            <a href="{% url 'student_detail' student.pk %}" class="transition-link inline-flex items-center px-5 py-2 bg-[#1c1c1e] border border-white/10 text-white text-sm font-semibold rounded-full hover:bg-white/10 transition-all">
+                                View
+                            </a>
+                            <a href="{% url 'delete_student' student.pk %}" 
+                               onclick="return confirm('Delete this record permanently?')"
+                               class="inline-flex items-center px-5 py-2 bg-red-500/10 text-red-500 text-sm font-semibold rounded-full hover:bg-red-500 hover:text-white transition-all">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div id="addModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] flex items-center justify-center p-6">
+        <div class="bg-[#1c1c1e] w-full max-w-md p-10 rounded-[2.5rem] border border-white/10 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-white tracking-tight">New Student Entry</h2>
+            <form action="{% url 'add_student' %}" method="POST" class="space-y-6">
+                {% csrf_token %}
+                <input type="text" name="name" placeholder="Full Name" required class="w-full bg-black border border-white/10 rounded-2xl px-5 py-3 text-white focus:border-blue-500 outline-none transition">
+                <input type="text" name="register_number" placeholder="Registration Number" required class="w-full bg-black border border-white/10 rounded-2xl px-5 py-3 text-white focus:border-blue-500 outline-none transition">
+                <input type="text" name="course" placeholder="Course (e.g. MSc)" required class="w-full bg-black border border-white/10 rounded-2xl px-5 py-3 text-white focus:border-blue-500 outline-none transition">
+                <div class="flex space-x-4 pt-4">
+                    <button type="submit" class="flex-1 bg-[#0071e3] py-3 rounded-full font-bold text-white hover:bg-[#0077ed] transition">Save</button>
+                    <button type="button" onclick="toggleModal()" class="flex-1 bg-white/5 py-3 rounded-full font-bold text-[#a1a1a6] hover:bg-white/10 transition">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.body.classList.add("page-loaded");
+            const links = document.querySelectorAll('.transition-link');
+            links.forEach(link => {
+                link.addEventListener("click", e => {
+                    if (link.hostname === window.location.hostname) {
+                        e.preventDefault();
+                        const target = link.href;
+                        document.body.style.opacity = "0";
+                        setTimeout(() => { window.location.href = target; }, 600);
+                    }
+                });
+            });
+        });
+
+        // Toggle Modal Function
+        function toggleModal() {
+            const modal = document.getElementById('addModal');
+            modal.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
